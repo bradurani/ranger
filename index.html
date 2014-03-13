@@ -5,9 +5,15 @@
 		<script src="ranger.js"></script>
 		<script src="rsvp.js"></script>
 		<script type="text/javascript">
-			(function($, Promise, console, document, environment) {
-				Ranger.app(arguments, "activate_form", [Ajax, ActivateMediator]);
-			})(jQuery, RSVP.Promise, console, document, "development");
+			(function() {
+				
+				Ranger.app(arguments, [Ajax, ActivateMediator]);
+
+			})(jQuery, RSVP.Promise, console, document, "Development");
+
+			
+
+			
 		</script>
 	</head>
 	<body>

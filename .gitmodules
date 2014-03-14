@@ -1,0 +1,3 @@
+[submodule "PubSubJS"]
+	path = PubSubJS
+	url = https://github.com/bradurani/PubSubJS

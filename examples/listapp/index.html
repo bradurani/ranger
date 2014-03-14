@@ -1,0 +1,27 @@
+<html>
+	<head>
+		<title>Test</title>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="../../ranger.js"></script>
+        <script src="../../modules/ranger.core.ajax.js"></script>
+        <script src="../../modules/ranger.core.errorhandler.js"></script>
+        <script src="modules/ranger.listapp.listmediator.js"></script>
+        <script src="modules/ranger.listapp.buttonmediator.js"></script>
+		<script src="../../lib/rsvp.js"></script>
+        <script src="../../lib/lodash.min.js"></script>
+		<script type="text/javascript">
+            (function(window, debug, dependencies) {
+                $(window.document).ready(function(){
+                    Ranger(window, debug, dependencies).load();
+                });
+                $.noConflict(); //Ensures nothing further down the page can use $
+             })(window, true, { "jquery": $,
+                               "promise": RSVP.Promise,
+                               "lodash": _
+                             });
+
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

@@ -1,70 +1,67 @@
-var Ajax = function($, console) {
-	
-	function get(url) {
-		return $.get(url);
-
-	}
-
-	function post(url) {
-		return $.get(url);
-	}
-
-	return {
-		"get" : get,
-		"post" : post
-	};
+var Ranger = function(window, debug, dependencies) {
+    if(!(this instanceof Ranger)){
+        return new Ranger(window, debug, dependencies);
+    }
+    this.window = window;
+    this.debug = debug;
+    this.console = this._getSafeConsole(this.window, this.debug);
+    this.dependencies = dependencies;
 };
-
-var ActivateMediator = function($, console) {
-
-	this.on("activate", messageHandler);
-	this.on("reset", messageHandler);
-
-	function messageHandler(data, topic) {
-		switch(topic) {
-			case "activate":
-				break;
-			case "reset":
-				break;
-		}
-	};
-
+Ranger.prototype = {
+    load: function() {
+        this.definitions = Ranger.definitions || [];
+        this.modules = this._map(this.definitions, this._loadModule.bind(this));
+        this._map(this.modules, this._initModule);
+    },
+    _map: function(array, func) {
+        var ret = [];
+        for(var item in array) {
+            if(array.hasOwnProperty(item)) {
+                ret.push(func(array[item]));
+            }
+        }
+        return ret;
+    },
+    _loadModule: function(def) {
+        this.console.log("Loading module: " + def.namespace);
+        var module = this._construct(def.Constructor, new Ranger._Module(def.namespace), def.dependencies);
+        return module;
+    },
+    _construct: function(Constructor, prototype, args) {
+        var F = function(){
+            return Constructor.apply(this, args);
+        };
+        if(prototype) {
+            F.prototype = prototype;
+        }
+        return new F();
+    },
+    _initModule: function(module) {
+        this.console.log("Initing module: " + module.toString());
+    },
+    _getSafeConsole: function(window, debug) {
+        var console = window.console = window.console || {};
+        var methods = ["assert","clear","count","debug","dir","dirxml","error","group","groupCollapsed","groupEnd","info",
+            "log","profile","profileEnd","time","timeEnd","timeStamp","trace","warn"]; //https://developers.google.com/chrome-developer-tools/docs/console-api
+        var count = methods.length;
+        var stub = function(){};
+        while(count--){
+            if(!console[methods[count]] || !debug) {
+                console[methods[count]] = stub;
+            }
+        }
+        //our levels in Ruby are: DEBUG, INFO, EVENT, WARN, ERROR, FATAL
+        console.fatal = console.error;
+        console.event = console.info;
+        return console;
+    }
 };
-
-
-
-var Ranger = function($, Promise, console, document, environment) {
-
-	function init(modules) {
-		var readyPromise = Promise.cast($(document).ready);
-		readyPromise.then(function() {
-			$(modules).forEach(function(Klass) {
-				register(Klass);
-			});
-		}).catch(console.error);
-	}
-
-	function register(Klass){
-		var module;
-
-		//Module base class
-		var Module = function(){};
-
-		try {
-			Klass.prototype = new Module();
-			module = new Klass($, console);
-			return module;
-		} catch (e) {
-
-		}
-	}
-
-	return { "init": init };
+Ranger.define = function(namespace, dependencies, Constructor) {
+    //TODO check inputs
+    Ranger.definitions = Ranger.definitions || [];
+    Ranger.definitions.push({ namespace: namespace, dependencies: dependencies, Constructor: Constructor});
 };
-
-//Factory method
-Ranger.app = function app(args, modules) {
-	var app = new Ranger($, Promise, console, document, environment);
-	app.init(modules);
-	return app;
-}
+Ranger._Module = function(namespace){
+    this.toString = function(){ return namespace; };
+    this.namespace = namespace;
+};

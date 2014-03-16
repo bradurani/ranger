@@ -1,27 +1,49 @@
 <html>
 	<head>
 		<title>Test</title>
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+
 		<script src="../../ranger.js"></script>
+
+        <!--Helpers. The order of these helpers matter if one helper get injected into an other-->
+        <script src="../../helpers/ranger.helpers.console.js"></script>
+        <script src="../../helpers/ranger.helpers.hub.js"></script>
+
+        <!--Modules-->
         <script src="../../modules/ranger.core.ajax.js"></script>
         <script src="../../modules/ranger.core.errorhandler.js"></script>
         <script src="modules/ranger.listapp.listmediator.js"></script>
         <script src="modules/ranger.listapp.buttonmediator.js"></script>
+        <script src="modules/ranger.listapp.js"></script>
+
+        <!--Dependencies-->
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script src="../../lib/rsvp.js"></script>
         <script src="../../lib/lodash.min.js"></script>
-		<script type="text/javascript">
-            (function(window, debug, dependencies) {
+        <script src="../../PubSubJS/src/pubsub.js"></script>
+
+        <!--snippet-->
+        <script type="text/javascript">
+            (function(dependencies, debug) {
                 $(window.document).ready(function(){
-                    Ranger(window, debug, dependencies).load();
+                    Ranger(dependencies, debug).load();
                 });
                 $.noConflict(); //Ensures nothing further down the page can use $
-             })(window, true, { "jquery": $,
-                               "promise": RSVP.Promise,
-                               "lodash": _
-                             });
+                _.noConflict(); //Ensures nothing further down the page can use _
+             })({ "jquery": $,
+                  "promise": RSVP.Promise,
+                  "lodash": _,
+                  "pubsub": PubSub,
+                  "window": window
+                }, true); //register all dependencies here
 
 		</script>
 	</head>
 	<body>
+        <ul class="main-list">
+
+        </ul>
+        <input type="text" id="input" style="width: 200px;"/>
+        <button id="submit">Enter</button>
 	</body>
 </html>

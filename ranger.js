@@ -1,67 +1,112 @@
-var Ranger = function(window, debug, dependencies) {
-    if(!(this instanceof Ranger)){
-        return new Ranger(window, debug, dependencies);
-    }
-    this.window = window;
-    this.debug = debug;
-    this.console = this._getSafeConsole(this.window, this.debug);
-    this.dependencies = dependencies;
-};
-Ranger.prototype = {
-    load: function() {
-        this.definitions = Ranger.definitions || [];
-        this.modules = this._map(this.definitions, this._loadModule.bind(this));
-        this._map(this.modules, this._initModule);
-    },
-    _map: function(array, func) {
-        var ret = [];
-        for(var item in array) {
-            if(array.hasOwnProperty(item)) {
-                ret.push(func(array[item]));
+(function(window) {
+
+    var Ranger = function(dependencyMap, debug) {
+        if(!(this instanceof Ranger)){
+            return new Ranger(dependencyMap, debug);
+        }
+        this.debug = debug;
+        this.dependencyMap = dependencyMap;
+        this.modules = [];
+    };
+
+    Ranger.prototype = {
+        load: function() {
+            this.moduleDefinitions = Ranger.moduleDefinitions || [];
+            this.dependencyMap.debug = this.debug;
+            this._loadHelpers();
+            this._loadModules();
+        },
+        _loadHelpers: function(){
+            this._forEach(Ranger.helperDefinitions, function(def) {
+                this.dependencyMap[def.name] = def;
+            }.bind(this));
+        },
+        _loadModules: function() {
+            this._forEach(this.moduleDefinitions, function(mod) {
+                var module = this._loadModule(mod);
+                this.modules.push(module);
+            }.bind(this));
+        },
+        _loadModule: function(def) {
+            var dependencies = this._getDependencyObjects(def.dependencies);
+            var proto = new Module(def.namespace, this.dependencyMap.console, this.dependencyMap.pubsub);
+            var module = this._constructObject(def.Constructor, proto, dependencies, true);
+            this._setDependencyModuleBackRefs(module, module.dependencies);
+            return module;
+        },
+        _getDependencyObjects: function(dependencyNames) {
+            return this._map(dependencyNames, function(name) {
+                if(name in this.dependencyMap) {
+                    //make new here
+                    var dep = this.dependencyMap[name];
+                    if(dep.HelperConstructor && typeof dep.HelperConstructor === "function") { //if it's a helper, instantiate a new one
+                        dep = this._constructObject(dep.HelperConstructor,
+                            new Helper(dep.name),
+                            this._getDependencyObjects(dep.dependencies)); //could create an infinite loop
+                    }
+                    return dep;
+                }
+                throw new Error("Dependency: " + name + " not found");
+            }.bind(this));
+        },
+        _constructObject: function(constructor, proto, args) {
+            var RangerObject = function(){
+                return constructor.apply(this, args);
+            };
+            if(proto) {
+                RangerObject.prototype = proto;
             }
-        }
-        return ret;
-    },
-    _loadModule: function(def) {
-        this.console.log("Loading module: " + def.namespace);
-        var module = this._construct(def.Constructor, new Ranger._Module(def.namespace), def.dependencies);
-        return module;
-    },
-    _construct: function(Constructor, prototype, args) {
-        var F = function(){
-            return Constructor.apply(this, args);
-        };
-        if(prototype) {
-            F.prototype = prototype;
-        }
-        return new F();
-    },
-    _initModule: function(module) {
-        this.console.log("Initing module: " + module.toString());
-    },
-    _getSafeConsole: function(window, debug) {
-        var console = window.console = window.console || {};
-        var methods = ["assert","clear","count","debug","dir","dirxml","error","group","groupCollapsed","groupEnd","info",
-            "log","profile","profileEnd","time","timeEnd","timeStamp","trace","warn"]; //https://developers.google.com/chrome-developer-tools/docs/console-api
-        var count = methods.length;
-        var stub = function(){};
-        while(count--){
-            if(!console[methods[count]] || !debug) {
-                console[methods[count]] = stub;
+            var o =  new RangerObject();
+            o.dependencies = args;
+            return o;
+        },
+        _setDependencyModuleBackRefs: function(module, dependencies) {
+            this._forEach(dependencies, function(dep){
+                dep.moduleBackRef = module;
+                if(dep.dependencies) {
+                    this._setDependencyModuleBackRefs(module, dep.dependencies);
+                }
+            }.bind(this));
+        },
+        _forEach: function(array, func) {
+            for(var item in array) {
+                if(array.hasOwnProperty(item)) {
+                    func(array[item]);
+                }
             }
+        },
+        _map: function(array, func) {
+            var ret = [];
+            this._forEach(array, function(i) {
+                ret.push(func(i));
+            }.bind(this));
+            return ret;
         }
-        //our levels in Ruby are: DEBUG, INFO, EVENT, WARN, ERROR, FATAL
-        console.fatal = console.error;
-        console.event = console.info;
-        return console;
-    }
-};
-Ranger.define = function(namespace, dependencies, Constructor) {
-    //TODO check inputs
-    Ranger.definitions = Ranger.definitions || [];
-    Ranger.definitions.push({ namespace: namespace, dependencies: dependencies, Constructor: Constructor});
-};
-Ranger._Module = function(namespace){
-    this.toString = function(){ return namespace; };
-    this.namespace = namespace;
-};
+    };
+
+    Ranger.define = function(namespace, dependencies, Constructor) {
+        //TODO check inputs
+        Ranger.moduleDefinitions = Ranger.moduleDefinitions || [];
+        Ranger.moduleDefinitions.push({ namespace: namespace, dependencies: dependencies, Constructor: Constructor});
+    };
+
+    Ranger.defineHelper = function(name, dependencies, Constructor) {
+        //TODO check inputs
+        Ranger.helperDefinitions = Ranger.helperDefinitions || [];
+        Ranger.helperDefinitions.push({ name: name, dependencies: dependencies, HelperConstructor: Constructor });
+    };
+
+    //prototype for modules
+    var Module = function(namespace, console, pubsub){
+        this.namespace = namespace;
+        this.toString = function(){ return "Ranger Module: " + namespace; };
+    };
+
+    var Helper = function(name) {
+        this.name = name;
+        this.toString = function(){ return "Ranger Helper: " + name; };
+    };
+
+    window.Ranger = Ranger;
+
+})(window);

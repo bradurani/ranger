@@ -1,3 +1,4 @@
+//test
 (function(window) {
 
     var Ranger = function(dependencyMap, debug) {

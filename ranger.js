@@ -36,17 +36,17 @@
         },
         _getDependencyObjects: function(dependencyNames) {
             return this._map(dependencyNames, function(name) {
-                if(name in this.dependencyMap) {
-                    //make new here
-                    var dep = this.dependencyMap[name];
-                    if(dep.HelperConstructor && typeof dep.HelperConstructor === "function") { //if it's a helper, instantiate a new one
-                        dep = this._constructObject(dep.HelperConstructor,
-                            new Helper(dep.name),
-                            this._getDependencyObjects(dep.dependencies)); //could create an infinite loop
-                    }
-                    return dep;
+                if(!(name in this.dependencyMap)) {
+                    throw new Error("Dependency: " + name + " not found");
                 }
-                throw new Error("Dependency: " + name + " not found");
+                var dep = this.dependencyMap[name];
+                if(dep.HelperConstructor && typeof dep.HelperConstructor === "function") { //if it's a helper, instantiate a new one
+                    var subDeps = this._getDependencyObjects(dep.dependencies);
+                    dep = this._constructObject(dep.HelperConstructor,
+                                                new Helper(dep.name),
+                                                subDeps); //could create an infinite loop
+                }
+                return dep;
             }.bind(this));
         },
         _constructObject: function(constructor, proto, args) {
@@ -62,9 +62,11 @@
         },
         _setDependencyModuleBackRefs: function(module, dependencies) {
             this._forEach(dependencies, function(dep){
-                dep.moduleBackRef = module;
-                if(dep.dependencies) {
-                    this._setDependencyModuleBackRefs(module, dep.dependencies);
+                if(dep instanceof Helper) {
+                    dep.moduleBackRef = module;
+                    if(dep.dependencies) {
+                     this._setDependencyModuleBackRefs(module, dep.dependencies);
+                    }
                 }
             }.bind(this));
         },

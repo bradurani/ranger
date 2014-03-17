@@ -5,17 +5,43 @@
 */
 Ranger.defineHelper("console", ["debug", "window"], function(debug, window) {
 
-    var methods = ["assert","clear","count","debug","dir","dirxml","error","group","groupCollapsed","groupEnd","info",
-        "log","profile","profileEnd","time","timeEnd","timeStamp","trace","warn"]; //https://developers.google.com/chrome-developer-tools/docs/console-api
+    //https://developers.google.com/chrome-developer-tools/docs/console-api
+    var methods = ["assert","clear","count","dir","dirxml","group","groupCollapsed","groupEnd",
+        "profile","profileEnd","time","timeEnd","timeStamp","trace"];
+    var outputMethods = ["debug","error","info","log","warn"];
+
+    this._addMethods = function(methods) {
+        var count = methods.length;
+        while(count--){
+            var methodName = methods[count];
+            this[methodName] = console[methodName] ? console[methodName].bind(console) : stub ;
+        }
+    };
+
+    this._addOutputMethods = function(methods) {
+        var count = methods.length;
+        while(count--){
+            var methodName = methods[count];
+            this[methodName] = console[methodName] ?
+                function() {
+                    var args = [].slice.call(arguments);
+                    if(typeof arguments[0] === "string" && this.moduleBackRef) {
+                        var newString = this.moduleBackRef.namespace + " " + args[0];
+                        args[0] = newString;
+                    }
+                    console[methodName].apply(console, args);
+                }.bind(this) : stub ;
+        }
+    };
+
 
     var console = window.console || {};
     var count = methods.length;
     var stub = function(){};
-    while(count--){
-        var methodName = methods[count];
-        this[methodName] = console[methodName] ? console[methodName].bind(console) : stub;
-    }
+    this._addMethods(methods);
+    this._addOutputMethods(outputMethods);
     //our levels in Ruby are: DEBUG, INFO, EVENT, WARN, ERROR, FATAL
+
     this.fatal = console.fatal = function(msg ) { console.error(msg); };
     this.event = console.event = function(msg) { console.info(msg); };
 });

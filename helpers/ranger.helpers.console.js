@@ -22,15 +22,18 @@ Ranger.defineHelper("console", ["debug", "window"], function(debug, window) {
         var count = methods.length;
         while(count--){
             var methodName = methods[count];
-            this[methodName] = console[methodName] ?
-                function() {
+            if(console[methodName] && debug) {
+                this[methodName] = function() {
                     var args = [].slice.call(arguments);
                     if(typeof arguments[0] === "string" && this.moduleBackRef) {
                         var newString = this.moduleBackRef.namespace + " " + args[0];
                         args[0] = newString;
                     }
                     console[methodName].apply(console, args);
-                }.bind(this) : stub ;
+                }.bind(this);
+            } else {
+                this[methodName] = stub;
+            }
         }
     };
 

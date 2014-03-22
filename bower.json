@@ -22,7 +22,7 @@
     "spec",
     "bower_components"
   ],
-  "dependencies": { //used for the helpers, but not necessary for ranger.js
+  "dependencies": {
     "pubsub-js": "~1.4",
     "jquery": "~1.11",
     "rsvp": "~3.0",

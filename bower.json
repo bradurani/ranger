@@ -1,0 +1,34 @@
+{
+  "name": "ranger",
+  "version": "0.5.0",
+  "main": "ranger.js",
+  "homepage": "https://github.com/bradurani/ranger",
+  "authors": [
+    "Brad Urani <bradurani@gmail.com>"
+  ],
+  "description": "A client-side micro-framework for modularization and dependency injection with optional helpers for pub/sub, ajax, and console logging",
+  "keywords": [
+    "ranger",
+    "micro",
+    "module",
+    "dependency",
+    "injection",
+    "urani"
+  ],
+  "license": "none",
+  "ignore": [
+    ".jshintrc",
+    "examples",
+    "spec",
+    "bower_components"
+  ],
+  "dependencies": { //used for the helpers, but not necessary for ranger.js
+    "pubsub-js": "~1.4",
+    "jquery": "~1.11",
+    "rsvp": "~3.0",
+    "lodash": ">= 2.1"
+  },
+  "devDependencies": {
+    "jasmine": "~2.0"
+  }
+}

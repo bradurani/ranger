@@ -39,7 +39,6 @@ Ranger.defineHelper("console", ["debug", "window"], function(debug, window) {
 
 
     var console = window.console || {};
-    var count = methods.length;
     var stub = function(){};
     this._addMethods(methods);
     this._addOutputMethods(outputMethods);

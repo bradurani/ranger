@@ -1,4 +1,4 @@
-Ranger.define("core.ajax", ["jquery", "promise"], function($, Promise) {
+Ranger.define("ajax", ["jquery", "promise"], function($, Promise) {
 
     this.get = function(url) {
         return Promise.cast($.get(url));

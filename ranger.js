@@ -5,7 +5,7 @@
         if(!(this instanceof Ranger)){
             return new Ranger(dependencyMap, debug);
         }
-        this.debug = debug;
+        this.debug = !!debug;
         this.dependencyMap = dependencyMap;
         this.modules = [];
     };

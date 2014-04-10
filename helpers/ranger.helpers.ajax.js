@@ -1,10 +1,10 @@
-Ranger.defineHelper("ajax", ["jquery", "promise", "console"], function($, Promise, console) {
+Ranger.defineHelper("ajax", ["jquery", "promise", "console", "debug"], function ($, Promise, console, debug) {
 
-    this.getJSON = function(url, data) {
+    this.getJSON = function (url, data) {
         return this.get(url, data, "json");
     };
 
-    this.get = function(url, data, dataType) {
+    this.get = function (url, data, dataType) {
         return this._send({
             url: url,
             data: data,
@@ -13,7 +13,7 @@ Ranger.defineHelper("ajax", ["jquery", "promise", "console"], function($, Promis
         });
     };
 
-    this.post = function(url, data, dataType) {
+    this.post = function (url, data, dataType) {
         return this._send({
             url: url,
             data: data,
@@ -22,11 +22,16 @@ Ranger.defineHelper("ajax", ["jquery", "promise", "console"], function($, Promis
         });
     };
 
-    this._send = function(params) {
-        console.log("Sending AJAX", params)
+    this._send = function (params) {
+        if(debug) {
+            console.log("---- Sending AJAX ----", params);
+        }
         return Promise.cast($.ajax(params))
-            .then(function(data){
-                console.log("Received AJAX", data);
+            .then(function (data) {
+                if(debug) {
+                    console.log("---- Received AJAX -----", data);
+                }
+                return Promise.resolve(data);
             });
     };
 

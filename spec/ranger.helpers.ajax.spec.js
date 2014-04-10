@@ -22,7 +22,7 @@ describe("Gives modules an fully featured ajax helper", function(){
         expect(console.log.calls.count()).toEqual(1);
     });
 
-    it("calls console.log on Promise fullfill", function(){
+    it("calls console.log on Promise fulfill", function(){
         //how to?
     });
 });

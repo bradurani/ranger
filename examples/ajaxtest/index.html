@@ -1,0 +1,37 @@
+<html>
+    <head>
+        <title>Test</title>
+
+        <script src="../../ranger.js"></script>
+
+        <!--Helpers. The order of these helpers matter if one helper get injected into an other-->
+        <script src="../../helpers/ranger.helpers.ajax.js"></script>
+
+        <!--App Modules-->
+        <script src="modules/ranger.ajaxtest.js"></script>
+
+        <!--Dependencies-->
+        <script src="../../bower_components/jquery/dist/jquery.js"></script>
+        <script src="../../bower_components/rsvp/rsvp.js"></script>
+
+        <!--snippet-->
+        <script type="text/javascript">
+            (function(dependencies, debug) {
+                $(window.document).ready(function(){
+                    Ranger(dependencies, debug).load();
+                });
+                $.noConflict(); //Ensures nothing further down the page can use $
+            })({ "jquery": $,
+                 "promise": RSVP.Promise,
+                 "window": window,
+                 "console": window.console
+            }, true); //register all dependencies here
+
+        </script>
+    </head>
+    <body>
+        <ul class="main-list">
+
+        </ul>
+    </body>
+</html>

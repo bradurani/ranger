@@ -1,10 +1,33 @@
-Ranger.define("ajax", ["jquery", "promise"], function($, Promise) {
+Ranger.defineHelper("ajax", ["jquery", "promise", "console"], function($, Promise, console) {
 
-    this.get = function(url) {
-        return Promise.cast($.get(url));
+    this.getJSON = function(url, data) {
+        return this.get(url, data, "json");
     };
 
-    this.post = function(url) {
-        return Promise.cast($.post(url));
+    this.get = function(url, data, dataType) {
+        return this._send({
+            url: url,
+            data: data,
+            dataType: dataType,
+            type: 'GET'
+        });
     };
+
+    this.post = function(url, data, dataType) {
+        return this._send({
+            url: url,
+            data: data,
+            dataType: dataType,
+            type: 'POST'
+        });
+    };
+
+    this._send = function(params) {
+        console.log("Sending AJAX: ", params)
+        return Promise.cast($.ajax(params))
+            .then(function(data){
+                console.log("received ajax: " + data);
+            });
+    };
+
 });

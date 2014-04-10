@@ -23,10 +23,10 @@ Ranger.defineHelper("ajax", ["jquery", "promise", "console"], function($, Promis
     };
 
     this._send = function(params) {
-        console.log("Sending AJAX: ", params)
+        console.log("Sending AJAX", params)
         return Promise.cast($.ajax(params))
             .then(function(data){
-                console.log("received ajax: " + data);
+                console.log("Received AJAX", data);
             });
     };
 

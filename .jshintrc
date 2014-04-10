@@ -33,6 +33,7 @@
         "it",
         "expect",
         "Ranger",
-        "beforeEach"
+        "beforeEach",
+        "spyOn"
     ]
 }

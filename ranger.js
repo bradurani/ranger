@@ -12,13 +12,14 @@
 
     Ranger.prototype = {
         load: function() {
-            this.moduleDefinitions = Ranger.moduleDefinitions || [];
+            this.moduleDefinitions = Ranger.moduleDefinitions || []; //protect against no modules registered
             this.dependencyMap.debug = this.debug;
             this._loadHelpers();
             this._loadModules();
         },
         _loadHelpers: function(){
-            this._forEach(Ranger.helperDefinitions, function(def) {
+            this.helperDefinitions = Ranger.helperDefinitions || []; //protect against no helpers registered
+            this._forEach(this.helperDefinitions, function(def) {
                 this.dependencyMap[def.name] = def;
             }.bind(this));
         },
@@ -30,7 +31,7 @@
         },
         _loadModule: function(def) {
             var dependencies = this._getDependencyObjects(def.dependencies);
-            var proto = new Module(def.namespace, this.dependencyMap.console, this.dependencyMap.pubsub);
+            var proto = new Module(def.namespace);
             var module = this._constructObject(def.Constructor, proto, dependencies, true);
             this._setDependencyModuleBackRefs(module, module.dependencies);
             return module;
@@ -98,9 +99,17 @@
         Ranger.helperDefinitions = Ranger.helperDefinitions || [];
         Ranger.helperDefinitions.push({ name: name, dependencies: dependencies, HelperConstructor: Constructor });
     };
-
+    Ranger.getHelperTestObject = function(name){
+        var C;
+        Ranger.prototype._forEach(Ranger.helperDefinitions, function(obj) {
+            if(obj.name === name) {
+                C = obj.HelperConstructor;
+            }
+        });
+        return Ranger.prototype._constructObject(C, new Helper(name), arguments[1]);
+    }
     //prototype for modules
-    var Module = function(namespace, console, pubsub){
+    var Module = function(namespace){
         this.namespace = namespace;
         this.toString = function(){ return "Ranger Module: " + namespace; };
     };

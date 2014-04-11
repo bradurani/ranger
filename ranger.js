@@ -16,6 +16,7 @@
             this.dependencyMap.debug = this.debug;
             this._loadHelpers();
             this._loadModules();
+            this._fireInitializers();
         },
         _loadHelpers: function(){
             this.helperDefinitions = Ranger.helperDefinitions || []; //protect against no helpers registered
@@ -71,6 +72,13 @@
                     }
                 }
             }.bind(this));
+        },
+        _fireInitializers: function(){
+            this._forEach(this.modules, function(module){
+                if(module.initialize && typeof module.initialize === "function") {
+                    module.initialize();
+                }
+            });
         },
         _forEach: function(array, func) {
             for(var item in array) {

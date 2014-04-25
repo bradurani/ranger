@@ -1,3 +1,4 @@
+/*global RSVP*/
 describe("Gives modules an fully featured ajax helper", function(){
     var helper;
     var $;
@@ -19,7 +20,6 @@ describe("Gives modules an fully featured ajax helper", function(){
         var data = { url: "http://foo", foo: "bar" };
         expect(helper._send(data)).toBeTruthy();
         expect($.ajax).toHaveBeenCalledWith(data);
-        expect(console.log.calls.count()).toEqual(1);
     });
 
     it("calls console.log on Promise fulfill", function(){
